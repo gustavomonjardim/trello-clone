@@ -7,6 +7,8 @@ export default function App() {
   return (
     <div className="App">
       <Column />
+      <Column />
+      <Column />
     </div>
   );
 }
