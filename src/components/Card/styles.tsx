@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
+  position: relative;
   display: flex;
   width: 100%;
   min-height: 60px;
@@ -18,4 +19,31 @@ export const Title = styled.span`
   line-height: 20px;
   text-align: start;
   word-break: break-all;
+`;
+
+export const Input = styled.textarea`
+  width: 100%;
+  background: #fff;
+  border: none;
+  border-radius: 3px;
+  resize: none;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400px;
+  padding: 4px 8px;
+  min-height: 20px;
+  display: block;
+
+  &:focus {
+    outline: none;
+  }
+`;
+
+export const EditTitleButton = styled.div`
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 `;

@@ -13,26 +13,42 @@ import {
   EditTitleButton
 } from "./styles";
 
+interface Card {
+  id: string;
+  title: string;
+}
+
 const Column = () => {
   const [title, setTitle] = useState("To do");
   const [isShowingInput, setIsShowingInput] = useState(false);
+  const [isAddingCard, setIsAddingCard] = useState(false);
+  const [cards, setCards] = useState<Card[]>([
+    { id: "1", title: "Criar clone do Trello" }
+  ]);
 
   useEffect(() => {
     const onClick = () => {
       if (isShowingInput) {
         setIsShowingInput(false);
       }
+      if (isAddingCard) {
+        setIsAddingCard(false);
+      }
     };
     document.addEventListener("click", onClick);
     return () => {
       document.removeEventListener("click", onClick);
     };
-  }, [isShowingInput]);
+  }, [isShowingInput, isAddingCard]);
 
-  const onPressEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter") {
+  const onTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" || e.key === "Escape") {
       setIsShowingInput(false);
     }
+  };
+
+  const editCardTitle = (id: string, title: string) => {
+    setCards(cards.map((card) => (card.id === id ? { ...card, title } : card)));
   };
 
   return (
@@ -54,17 +70,26 @@ const Column = () => {
             value={title}
             autoFocus
             onChange={({ target }) => setTitle(target.value)}
-            onKeyDown={onPressEnter}
+            onKeyDown={onTitleKeyDown}
           />
         )}
       </Header>
       <CardList>
-        <Card />
-        <Card />
-        <Card />
+        {cards.map((card) => (
+          <Card
+            key={card.id}
+            id={card.id}
+            title={card.title}
+            editTitle={editCardTitle}
+          />
+        ))}
       </CardList>
       <Footer>
-        <Button>Adicionar outro cartão</Button>
+        {!isAddingCard && (
+          <Button onClick={() => setIsAddingCard(true)}>
+            Adicionar outro cartão
+          </Button>
+        )}
       </Footer>
     </Container>
   );
