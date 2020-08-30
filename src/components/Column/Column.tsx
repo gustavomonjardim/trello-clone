@@ -18,19 +18,31 @@ interface Card {
   title: string;
 }
 
-const Column = () => {
-  const [title, setTitle] = useState("To do");
-  const [isShowingInput, setIsShowingInput] = useState(false);
+interface AddNewCardProps {
+  cards: Card[];
+  setCards: React.Dispatch<React.SetStateAction<Card[]>>;
+}
+
+const AddNewCard: React.FC<AddNewCardProps> = ({ cards, setCards }) => {
   const [isAddingCard, setIsAddingCard] = useState(false);
-  const [cards, setCards] = useState<Card[]>([
-    { id: "1", title: "Criar clone do Trello" }
-  ]);
+  const [newCard, setNewCard] = useState<Card>({
+    id: String(cards.length + 1),
+    title: ""
+  });
+
+  const cancelCardAddition = () => {
+    setIsAddingCard(false);
+    setNewCard((c) => ({ ...c, title: "" }));
+  };
+
+  const addCard = (id: string, title: string) => {
+    setCards([...cards, { id, title }]);
+    setIsAddingCard(false);
+    setNewCard({ id: String(id + 1), title: "" });
+  };
 
   useEffect(() => {
     const onClick = () => {
-      if (isShowingInput) {
-        setIsShowingInput(false);
-      }
       if (isAddingCard) {
         setIsAddingCard(false);
       }
@@ -39,7 +51,45 @@ const Column = () => {
     return () => {
       document.removeEventListener("click", onClick);
     };
-  }, [isShowingInput, isAddingCard]);
+  }, [isAddingCard]);
+
+  if (isAddingCard) {
+    return (
+      <>
+        <Card
+          newCard
+          id={newCard.id}
+          title={newCard.title}
+          onSuccess={addCard}
+          onDismiss={cancelCardAddition}
+        />
+      </>
+    );
+  }
+
+  return (
+    <Button onClick={() => setIsAddingCard(true)}>
+      Adicionar outro cartão
+    </Button>
+  );
+};
+
+const Column = () => {
+  const [title, setTitle] = useState("To do");
+  const [isShowingInput, setIsShowingInput] = useState(false);
+  const [cards, setCards] = useState<Card[]>([]);
+
+  useEffect(() => {
+    const onClick = () => {
+      if (isShowingInput) {
+        setIsShowingInput(false);
+      }
+    };
+    document.addEventListener("click", onClick);
+    return () => {
+      document.removeEventListener("click", onClick);
+    };
+  }, [isShowingInput]);
 
   const onTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" || e.key === "Escape") {
@@ -80,16 +130,12 @@ const Column = () => {
             key={card.id}
             id={card.id}
             title={card.title}
-            editTitle={editCardTitle}
+            onSuccess={editCardTitle}
           />
         ))}
       </CardList>
       <Footer>
-        {!isAddingCard && (
-          <Button onClick={() => setIsAddingCard(true)}>
-            Adicionar outro cartão
-          </Button>
-        )}
+        <AddNewCard cards={cards} setCards={setCards} />
       </Footer>
     </Container>
   );

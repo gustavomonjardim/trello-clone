@@ -5,11 +5,20 @@ import { Container, Title, Input, EditTitleButton } from "./styles";
 interface Props {
   id: string;
   title: string;
-  editTitle: (id: string, title: string) => void;
+  onSuccess: (id: string, title: string) => void;
+  onDismiss?: () => void;
+  newCard?: boolean;
 }
 
-const Card: React.FC<Props> = ({ title, id, editTitle }) => {
-  const [isEditing, setIsEditing] = useState(false);
+const Card: React.FC<Props> = ({
+  title,
+  id,
+  onSuccess,
+  onDismiss,
+  newCard = false
+}) => {
+  const [currentTitle, setCurrentTitle] = useState(title);
+  const [isEditing, setIsEditing] = useState(newCard);
 
   useEffect(() => {
     const onClick = () => {
@@ -24,8 +33,16 @@ const Card: React.FC<Props> = ({ title, id, editTitle }) => {
   }, [isEditing]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" || e.key === "Escape") {
+    if (e.key === "Enter") {
       setIsEditing(false);
+      onSuccess(id, currentTitle);
+    }
+    if (e.key === "Escape") {
+      setCurrentTitle(title);
+      setIsEditing(false);
+      if (typeof onDismiss === "function") {
+        onDismiss();
+      }
     }
   };
 
@@ -44,9 +61,9 @@ const Card: React.FC<Props> = ({ title, id, editTitle }) => {
       {isEditing && (
         <Input
           rows={1}
-          value={title}
+          value={currentTitle}
           autoFocus
-          onChange={({ target }) => editTitle(id, target.value)}
+          onChange={({ target }) => setCurrentTitle(target.value)}
           onKeyDown={onKeyDown}
         />
       )}
