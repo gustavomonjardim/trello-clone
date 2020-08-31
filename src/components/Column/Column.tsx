@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 import Card from "../Card";
+import { useClickOutside } from "../../hooks";
 
 import {
   Container,
   Header,
   CardList,
-  Footer,
   Title,
   Button,
   Input,
@@ -14,7 +14,7 @@ import {
 } from "./styles";
 
 interface Card {
-  id: string;
+  id: number;
   title: string;
 }
 
@@ -23,10 +23,18 @@ interface AddNewCardProps {
   setCards: React.Dispatch<React.SetStateAction<Card[]>>;
 }
 
+interface ColumnProps {
+  id: number;
+  title: string;
+  newColumn?: boolean;
+  onSuccess: (id: number, title: string) => void;
+  onDismiss?: () => void;
+}
+
 const AddNewCard: React.FC<AddNewCardProps> = ({ cards, setCards }) => {
   const [isAddingCard, setIsAddingCard] = useState(false);
   const [newCard, setNewCard] = useState<Card>({
-    id: String(cards.length + 1),
+    id: cards.length + 1,
     title: ""
   });
 
@@ -35,23 +43,11 @@ const AddNewCard: React.FC<AddNewCardProps> = ({ cards, setCards }) => {
     setNewCard((c) => ({ ...c, title: "" }));
   };
 
-  const addCard = (id: string, title: string) => {
+  const addCard = (id: number, title: string) => {
     setCards([...cards, { id, title }]);
     setIsAddingCard(false);
-    setNewCard({ id: String(id + 1), title: "" });
+    setNewCard({ id: id + 1, title: "" });
   };
-
-  useEffect(() => {
-    const onClick = () => {
-      if (isAddingCard) {
-        setIsAddingCard(false);
-      }
-    };
-    document.addEventListener("click", onClick);
-    return () => {
-      document.removeEventListener("click", onClick);
-    };
-  }, [isAddingCard]);
 
   if (isAddingCard) {
     return (
@@ -74,55 +70,78 @@ const AddNewCard: React.FC<AddNewCardProps> = ({ cards, setCards }) => {
   );
 };
 
-const Column = () => {
-  const [title, setTitle] = useState("To do");
-  const [isShowingInput, setIsShowingInput] = useState(false);
+const Column: React.FC<ColumnProps> = ({
+  newColumn = false,
+  id,
+  title,
+  onSuccess,
+  onDismiss
+}) => {
+  const [currentTitle, setCurrentTitle] = useState(title);
+  const [isEditing, setIsEditing] = useState(newColumn);
   const [cards, setCards] = useState<Card[]>([]);
 
-  useEffect(() => {
-    const onClick = () => {
-      if (isShowingInput) {
-        setIsShowingInput(false);
-      }
-    };
-    document.addEventListener("click", onClick);
-    return () => {
-      document.removeEventListener("click", onClick);
-    };
-  }, [isShowingInput]);
+  const ref = useRef<HTMLTextAreaElement>();
 
-  const onTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" || e.key === "Escape") {
-      setIsShowingInput(false);
+  useClickOutside(ref, () => {
+    if (isEditing) {
+      setIsEditing(false);
+
+      if (typeof onDismiss === "function") {
+        onDismiss();
+      }
+    }
+  });
+
+  useEffect(() => {
+    if (isEditing) {
+      ref?.current?.focus?.();
+      ref?.current?.select?.();
+    } else {
+      ref?.current?.blur?.();
+    }
+  }, [isEditing]);
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      setIsEditing(false);
+      onSuccess(id, currentTitle);
+    }
+    if (e.key === "Escape") {
+      setCurrentTitle(title);
+      setIsEditing(false);
+      if (typeof onDismiss === "function") {
+        onDismiss();
+      }
     }
   };
 
-  const editCardTitle = (id: string, title: string) => {
+  const editCardTitle = (id: number, title: string) => {
     setCards(cards.map((card) => (card.id === id ? { ...card, title } : card)));
   };
 
   return (
     <Container>
       <Header>
-        {!isShowingInput && (
+        <Title>{currentTitle}</Title>
+        {!isEditing && (
           <>
             <EditTitleButton
               onClick={() => {
-                setIsShowingInput(true);
+                setIsEditing(true);
               }}
             />
-            <Title>{title}</Title>
           </>
         )}
-        {isShowingInput && (
-          <Input
-            rows={1}
-            value={title}
-            autoFocus
-            onChange={({ target }) => setTitle(target.value)}
-            onKeyDown={onTitleKeyDown}
-          />
-        )}
+        <Input
+          isEditing={isEditing}
+          ref={ref as any}
+          rows={1}
+          value={currentTitle}
+          onChange={({ target }) => setCurrentTitle(target.value)}
+          onKeyDown={onKeyDown}
+        />
       </Header>
       <CardList>
         {cards.map((card) => (
@@ -134,9 +153,7 @@ const Column = () => {
           />
         ))}
       </CardList>
-      <Footer>
-        <AddNewCard cards={cards} setCards={setCards} />
-      </Footer>
+      {!newColumn && <AddNewCard cards={cards} setCards={setCards} />}{" "}
     </Container>
   );
 };

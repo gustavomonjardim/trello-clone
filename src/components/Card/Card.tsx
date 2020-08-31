@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
+import { useClickOutside } from "../../hooks";
 import { Container, Title, Input, EditTitleButton } from "./styles";
 
 interface Props {
-  id: string;
+  id: number;
   title: string;
-  onSuccess: (id: string, title: string) => void;
+  onSuccess: (id: number, title: string) => void;
   onDismiss?: () => void;
   newCard?: boolean;
 }
@@ -20,20 +21,28 @@ const Card: React.FC<Props> = ({
   const [currentTitle, setCurrentTitle] = useState(title);
   const [isEditing, setIsEditing] = useState(newCard);
 
-  useEffect(() => {
-    const onClick = () => {
-      if (isEditing) {
-        setIsEditing(false);
+  const ref = useRef<HTMLTextAreaElement>();
+
+  useClickOutside(ref, () => {
+    if (isEditing) {
+      setIsEditing(false);
+
+      if (typeof onDismiss === "function") {
+        onDismiss();
       }
-    };
-    document.addEventListener("click", onClick);
-    return () => {
-      document.removeEventListener("click", onClick);
-    };
+    }
+  });
+
+  useEffect(() => {
+    if (isEditing) {
+      ref?.current?.focus?.();
+      ref?.current?.select?.();
+    }
   }, [isEditing]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
+      e.preventDefault();
       setIsEditing(false);
       onSuccess(id, currentTitle);
     }
@@ -60,9 +69,9 @@ const Card: React.FC<Props> = ({
       )}
       {isEditing && (
         <Input
+          ref={ref as any}
           rows={1}
           value={currentTitle}
-          autoFocus
           onChange={({ target }) => setCurrentTitle(target.value)}
           onKeyDown={onKeyDown}
         />
