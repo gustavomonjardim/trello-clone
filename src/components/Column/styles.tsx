@@ -1,5 +1,9 @@
 import styled from "styled-components";
 
+interface InputProps {
+  readonly isEditing: boolean;
+}
+
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -12,14 +16,7 @@ export const Container = styled.div`
   padding: 0 8px 8px;
 `;
 
-export const Header = styled.div`
-  padding: 10px;
-  position: relative;
-`;
-
 export const CardList = styled.div``;
-
-export const Footer = styled.div``;
 
 export const Button = styled.button`
   width: 100%;
@@ -38,28 +35,41 @@ export const Button = styled.button`
   }
 `;
 
+export const Header = styled.div`
+  padding: 8px 0px;
+  position: relative;
+`;
+
 export const Title = styled.h2`
+  display: none;
   text-align: start;
   color: #172b4d;
+  font-size: 14px;
+  line-height: 14px;
+  font-weight: 600;
+  min-height: 20px;
+  padding: 8px;
+  margin: 0;
+`;
+
+export const Input = styled.textarea<InputProps>`
+  font-family: sans-serif;
+  width: 100%;
+  color: #172b4d;
+  background: ${({ isEditing }) => (isEditing ? "#fff" : "transparent")};
+  border: none;
+  border-radius: 3px;
+  box-shadow: ${({ isEditing }) =>
+    isEditing ? "inset 0 0 0 2px #0079bf" : "none"};
+  resize: none;
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
   min-height: 20px;
-`;
-
-export const Input = styled.textarea`
-  width: 100%;
-  background: #fff;
-  border: none;
-  border-radius: 3px;
-  box-shadow: inset 0 0 0 2px #0079bf;
-  resize: none;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 600px;
   padding: 4px 8px;
-  min-height: 20px;
+  margin: 0;
   display: block;
+  transition: all 0.1s linear;
 
   &:focus {
     outline: none;

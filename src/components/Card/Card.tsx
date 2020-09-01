@@ -72,6 +72,7 @@ const Card: React.FC<Props> = ({
           ref={ref as any}
           rows={1}
           value={currentTitle}
+          spellCheck={false}
           onChange={({ target }) => setCurrentTitle(target.value)}
           onKeyDown={onKeyDown}
         />

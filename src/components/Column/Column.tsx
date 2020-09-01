@@ -138,6 +138,7 @@ const Column: React.FC<ColumnProps> = ({
           isEditing={isEditing}
           ref={ref as any}
           rows={1}
+          spellCheck={false}
           value={currentTitle}
           onChange={({ target }) => setCurrentTitle(target.value)}
           onKeyDown={onKeyDown}
