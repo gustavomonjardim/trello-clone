@@ -3,6 +3,14 @@
   padding: 0;
   box-sizing: border-box;
   border: none;
+  font-family: sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
 }
 
 body {
@@ -10,13 +18,13 @@ body {
 }
 
 .App {
-  font-family: sans-serif;
   text-align: center;
   display: flex;
-  gap: 16px;
+  flex-wrap: nowrap;
+  gap: 12px;
   align-items: flex-start;
-  overflow: auto;
-  height: 100vh;
-  width: 100%;
+  height: 100%;
   padding: 12px;
+  overflow: auto;
+  min-width: 100%;
 }
