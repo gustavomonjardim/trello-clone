@@ -1,40 +1,70 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Draggable } from "react-beautiful-dnd";
+import { v4 as uuidv4 } from "uuid";
 
 import { useClickOutside } from "../../hooks";
 import { Container, Title, Input, EditTitleButton } from "./styles";
 
-interface Props {
+interface CardProps {
   id: string;
   title: string;
   onSuccess: (id: string, title: string) => void;
-  onDismiss?: () => void;
-  newCard?: boolean;
-  columnId: number;
   currentIndex: number;
 }
 
-const Card: React.FC<Props> = ({
-  title,
-  id,
-  onSuccess,
-  onDismiss,
-  columnId,
-  currentIndex,
-  newCard = false
-}) => {
+interface NewCardProps {
+  onSuccess: (id: string, title: string) => void;
+  onDismiss: () => void;
+}
+
+export const NewCard: React.FC<NewCardProps> = ({ onSuccess, onDismiss }) => {
+  const [currentTitle, setCurrentTitle] = useState("");
+
+  const ref = useRef<HTMLTextAreaElement>();
+
+  useClickOutside(ref, () => {
+    onDismiss();
+  });
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (currentTitle) {
+        onSuccess(uuidv4(), currentTitle);
+      }
+    }
+    if (e.key === "Escape") {
+      setCurrentTitle("");
+      if (typeof onDismiss === "function") {
+        onDismiss();
+      }
+    }
+  };
+
+  return (
+    <Container>
+      <Input
+        autoFocus
+        ref={ref as any}
+        rows={1}
+        value={currentTitle}
+        spellCheck={false}
+        onChange={({ target }) => setCurrentTitle(target.value)}
+        onKeyDown={onKeyDown}
+      />
+    </Container>
+  );
+};
+
+const Card: React.FC<CardProps> = ({ title, id, onSuccess, currentIndex }) => {
   const [currentTitle, setCurrentTitle] = useState(title);
-  const [isEditing, setIsEditing] = useState(newCard);
+  const [isEditing, setIsEditing] = useState(false);
 
   const ref = useRef<HTMLTextAreaElement>();
 
   useClickOutside(ref, () => {
     if (isEditing) {
       setIsEditing(false);
-
-      if (typeof onDismiss === "function") {
-        onDismiss();
-      }
     }
   });
 
@@ -56,41 +86,11 @@ const Card: React.FC<Props> = ({
     if (e.key === "Escape") {
       setCurrentTitle(title);
       setIsEditing(false);
-      if (typeof onDismiss === "function") {
-        onDismiss();
-      }
     }
   };
 
-  if (newCard) {
-    return (
-      <Container>
-        {!isEditing && (
-          <>
-            <EditTitleButton
-              onClick={() => {
-                setIsEditing(true);
-              }}
-            />
-            <Title>{title}</Title>
-          </>
-        )}
-        {isEditing && (
-          <Input
-            ref={ref as any}
-            rows={1}
-            value={currentTitle}
-            spellCheck={false}
-            onChange={({ target }) => setCurrentTitle(target.value)}
-            onKeyDown={onKeyDown}
-          />
-        )}
-      </Container>
-    );
-  }
-
   return (
-    <Draggable draggableId={id + "-" + columnId} index={currentIndex}>
+    <Draggable draggableId={id} index={currentIndex}>
       {(provided, snapshot) => (
         <Container
           ref={provided.innerRef}

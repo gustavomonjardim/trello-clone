@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { v4 as uuidv4 } from "uuid";
 
-import Card from "../Card";
+import Card, { NewCard } from "../Card";
 import { useClickOutside } from "../../hooks";
 import { Droppable } from "react-beautiful-dnd";
 
@@ -39,14 +38,9 @@ const AddNewCard: React.FC<AddNewCardProps> = ({
   columnId
 }) => {
   const [isAddingCard, setIsAddingCard] = useState(false);
-  const [newCard, setNewCard] = useState<CardInterface>({
-    id: uuidv4(),
-    title: ""
-  });
 
   const cancelCardAddition = () => {
     setIsAddingCard(false);
-    setNewCard((c) => ({ ...c, title: "" }));
   };
 
   const addCard = (id: string, title: string) => {
@@ -54,21 +48,12 @@ const AddNewCard: React.FC<AddNewCardProps> = ({
       setCards({ id, title }, columnId);
     }
     setIsAddingCard(false);
-    setNewCard({ id: id + 1, title: "" });
   };
 
   if (isAddingCard) {
     return (
       <>
-        <Card
-          columnId={columnId}
-          newCard
-          currentIndex={0}
-          id={newCard.id}
-          title={newCard.title}
-          onSuccess={addCard}
-          onDismiss={cancelCardAddition}
-        />
+        <NewCard onSuccess={addCard} onDismiss={cancelCardAddition} />
       </>
     );
   }
@@ -167,7 +152,6 @@ const Column: React.FC<ColumnProps> = ({
             {cards.map((card, index) => (
               <Card
                 currentIndex={index}
-                columnId={id}
                 key={card.id}
                 id={card.id}
                 title={card.title}
