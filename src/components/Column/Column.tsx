@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import Card from "../Card";
 import { useClickOutside } from "../../hooks";
+import { Droppable } from "react-beautiful-dnd";
+
+import { Card as CardInterface } from "../../App";
 
 import {
   Container,
@@ -13,28 +17,30 @@ import {
   EditTitleButton
 } from "./styles";
 
-interface Card {
-  id: number;
-  title: string;
-}
-
 interface AddNewCardProps {
-  cards: Card[];
-  setCards: React.Dispatch<React.SetStateAction<Card[]>>;
+  cards: CardInterface[];
+  setCards?: (card: CardInterface, columnId: number) => void;
+  columnId: number;
 }
 
 interface ColumnProps {
   id: number;
   title: string;
+  cards: CardInterface[];
+  setCards?: (card: CardInterface, columnId: number) => void;
   newColumn?: boolean;
   onSuccess: (id: number, title: string) => void;
   onDismiss?: () => void;
 }
 
-const AddNewCard: React.FC<AddNewCardProps> = ({ cards, setCards }) => {
+const AddNewCard: React.FC<AddNewCardProps> = ({
+  cards,
+  setCards,
+  columnId
+}) => {
   const [isAddingCard, setIsAddingCard] = useState(false);
-  const [newCard, setNewCard] = useState<Card>({
-    id: cards.length + 1,
+  const [newCard, setNewCard] = useState<CardInterface>({
+    id: uuidv4(),
     title: ""
   });
 
@@ -43,8 +49,10 @@ const AddNewCard: React.FC<AddNewCardProps> = ({ cards, setCards }) => {
     setNewCard((c) => ({ ...c, title: "" }));
   };
 
-  const addCard = (id: number, title: string) => {
-    setCards([...cards, { id, title }]);
+  const addCard = (id: string, title: string) => {
+    if (typeof setCards === "function") {
+      setCards({ id, title }, columnId);
+    }
     setIsAddingCard(false);
     setNewCard({ id: id + 1, title: "" });
   };
@@ -53,7 +61,9 @@ const AddNewCard: React.FC<AddNewCardProps> = ({ cards, setCards }) => {
     return (
       <>
         <Card
+          columnId={columnId}
           newCard
+          currentIndex={0}
           id={newCard.id}
           title={newCard.title}
           onSuccess={addCard}
@@ -74,12 +84,13 @@ const Column: React.FC<ColumnProps> = ({
   newColumn = false,
   id,
   title,
+  cards,
+  setCards,
   onSuccess,
   onDismiss
 }) => {
   const [currentTitle, setCurrentTitle] = useState(title);
   const [isEditing, setIsEditing] = useState(newColumn);
-  const [cards, setCards] = useState<Card[]>([]);
 
   const ref = useRef<HTMLTextAreaElement>();
 
@@ -117,8 +128,10 @@ const Column: React.FC<ColumnProps> = ({
     }
   };
 
-  const editCardTitle = (id: number, title: string) => {
-    setCards(cards.map((card) => (card.id === id ? { ...card, title } : card)));
+  const editCardTitle = (cardId: string, title: string) => {
+    if (typeof setCards === "function") {
+      setCards({ id: cardId, title }, id);
+    }
   };
 
   return (
@@ -144,17 +157,30 @@ const Column: React.FC<ColumnProps> = ({
           onKeyDown={onKeyDown}
         />
       </Header>
-      <CardList>
-        {cards.map((card) => (
-          <Card
-            key={card.id}
-            id={card.id}
-            title={card.title}
-            onSuccess={editCardTitle}
-          />
-        ))}
-      </CardList>
-      {!newColumn && <AddNewCard cards={cards} setCards={setCards} />}{" "}
+      <Droppable droppableId={`${id}`} type="Column">
+        {(provided, snapshot) => (
+          <CardList
+            ref={provided.innerRef}
+            style={{}}
+            {...provided.droppableProps}
+          >
+            {cards.map((card, index) => (
+              <Card
+                currentIndex={index}
+                columnId={id}
+                key={card.id}
+                id={card.id}
+                title={card.title}
+                onSuccess={editCardTitle}
+              />
+            ))}
+            {provided.placeholder}
+          </CardList>
+        )}
+      </Droppable>
+      {!newColumn && (
+        <AddNewCard cards={cards} setCards={setCards} columnId={id} />
+      )}
     </Container>
   );
 };

@@ -1,14 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Draggable } from "react-beautiful-dnd";
 
 import { useClickOutside } from "../../hooks";
 import { Container, Title, Input, EditTitleButton } from "./styles";
 
 interface Props {
-  id: number;
+  id: string;
   title: string;
-  onSuccess: (id: number, title: string) => void;
+  onSuccess: (id: string, title: string) => void;
   onDismiss?: () => void;
   newCard?: boolean;
+  columnId: number;
+  currentIndex: number;
 }
 
 const Card: React.FC<Props> = ({
@@ -16,6 +19,8 @@ const Card: React.FC<Props> = ({
   id,
   onSuccess,
   onDismiss,
+  columnId,
+  currentIndex,
   newCard = false
 }) => {
   const [currentTitle, setCurrentTitle] = useState(title);
@@ -43,8 +48,10 @@ const Card: React.FC<Props> = ({
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      setIsEditing(false);
-      onSuccess(id, currentTitle);
+      if (currentTitle) {
+        setIsEditing(false);
+        onSuccess(id, currentTitle);
+      }
     }
     if (e.key === "Escape") {
       setCurrentTitle(title);
@@ -55,29 +62,64 @@ const Card: React.FC<Props> = ({
     }
   };
 
-  return (
-    <Container>
-      {!isEditing && (
-        <>
-          <EditTitleButton
-            onClick={() => {
-              setIsEditing(true);
-            }}
+  if (newCard) {
+    return (
+      <Container>
+        {!isEditing && (
+          <>
+            <EditTitleButton
+              onClick={() => {
+                setIsEditing(true);
+              }}
+            />
+            <Title>{title}</Title>
+          </>
+        )}
+        {isEditing && (
+          <Input
+            ref={ref as any}
+            rows={1}
+            value={currentTitle}
+            spellCheck={false}
+            onChange={({ target }) => setCurrentTitle(target.value)}
+            onKeyDown={onKeyDown}
           />
-          <Title>{title}</Title>
-        </>
+        )}
+      </Container>
+    );
+  }
+
+  return (
+    <Draggable draggableId={id + "-" + columnId} index={currentIndex}>
+      {(provided, snapshot) => (
+        <Container
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+        >
+          {!isEditing && (
+            <>
+              <EditTitleButton
+                onClick={() => {
+                  setIsEditing(true);
+                }}
+              />
+              <Title>{title}</Title>
+            </>
+          )}
+          {isEditing && (
+            <Input
+              ref={ref as any}
+              rows={1}
+              value={currentTitle}
+              spellCheck={false}
+              onChange={({ target }) => setCurrentTitle(target.value)}
+              onKeyDown={onKeyDown}
+            />
+          )}
+        </Container>
       )}
-      {isEditing && (
-        <Input
-          ref={ref as any}
-          rows={1}
-          value={currentTitle}
-          spellCheck={false}
-          onChange={({ target }) => setCurrentTitle(target.value)}
-          onKeyDown={onKeyDown}
-        />
-      )}
-    </Container>
+    </Draggable>
   );
 };
 

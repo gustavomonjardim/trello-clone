@@ -16,7 +16,9 @@ export const Container = styled.div`
   padding: 0 8px 8px;
 `;
 
-export const CardList = styled.div``;
+export const CardList = styled.div`
+  min-height: 1px;
+`;
 
 export const Button = styled.button`
   width: 100%;

@@ -22,6 +22,7 @@ export const Title = styled.span`
 `;
 
 export const Input = styled.textarea`
+  font-family: sans-serif;
   width: 100%;
   background: #fff;
   border: none;
@@ -29,8 +30,7 @@ export const Input = styled.textarea`
   resize: none;
   font-size: 14px;
   line-height: 20px;
-  font-weight: 400px;
-  padding: 4px 8px;
+  font-weight: 400;
   min-height: 20px;
   display: block;
 

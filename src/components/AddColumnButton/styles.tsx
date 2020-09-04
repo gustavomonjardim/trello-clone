@@ -9,7 +9,6 @@ export const Container = styled.button`
   max-width: 272px;
   min-width: 272px;
   border-radius: 3px;
-  overflow: none;
   padding: 8px;
   font-size: 14px;
   line-height: 20px;
