@@ -18,13 +18,21 @@ body {
 }
 
 .App {
-  text-align: center;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  height: 100%;
+  gap: 12px;
+  padding: 12px;
+  overflow: auto;
+  min-width: 100%;
+}
+
+.list {
   display: flex;
   flex-wrap: nowrap;
   gap: 12px;
   align-items: flex-start;
   height: 100%;
-  padding: 12px;
-  overflow: auto;
-  min-width: 100%;
 }

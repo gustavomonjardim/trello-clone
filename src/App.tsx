@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { DragDropContext, DropResult } from "react-beautiful-dnd";
+import { DragDropContext, DropResult, Droppable } from "react-beautiful-dnd";
 import "./styles.css";
 
 import Column, { NewColumn } from "./components/Column";
@@ -82,15 +82,16 @@ export default function App() {
     );
   };
 
-  const reorder = (list: Card[], startIndex: number, endIndex: number) => {
+  function reorder<T>(list: T[], startIndex: number, endIndex: number) {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
 
     return result;
-  };
+  }
 
-  const onDragEnd = (result: DropResult) => {
+  const onCardDrag = (result: DropResult) => {
+    console.log(result);
     const sourceColumnIndex = columns.findIndex(
       (column) => column.id === result.source.droppableId
     );
@@ -112,7 +113,7 @@ export default function App() {
           index === sourceColumnIndex
             ? {
                 ...column,
-                cards: reorder(
+                cards: reorder<Card>(
                   column.cards,
                   sourceCardIndex,
                   destinationCardIndex
@@ -148,20 +149,46 @@ export default function App() {
     );
   };
 
+  const onDragEnd = (result: DropResult) => {
+    if (result.type === "Column") {
+      onCardDrag(result);
+    } else {
+      if (!result.destination) {
+        return;
+      }
+
+      setColumns(
+        reorder<Column>(columns, result.source.index, result.destination.index)
+      );
+    }
+  };
+
   return (
     <div className="App">
       <DragDropContext onDragEnd={onDragEnd}>
-        {columns.map((column) => (
-          <Column
-            key={column.id}
-            id={column.id}
-            title={column.title}
-            cards={column.cards}
-            addCard={addCard}
-            updateCard={updateCard}
-            editColumn={editColumnTitle}
-          />
-        ))}
+        <Droppable droppableId={`parent`} direction="horizontal" type="Box">
+          {(provided, snapshot) => (
+            <div
+              className="list"
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              {columns.map((column, index) => (
+                <Column
+                  currentIndex={index}
+                  key={column.id}
+                  id={column.id}
+                  title={column.title}
+                  cards={column.cards}
+                  addCard={addCard}
+                  updateCard={updateCard}
+                  editColumn={editColumnTitle}
+                />
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
         <AddNewColumn columns={columns} setColumns={setColumns} />
       </DragDropContext>
     </div>

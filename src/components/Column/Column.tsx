@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { Draggable, Droppable } from "react-beautiful-dnd";
 
 import Card, { NewCard } from "../Card";
 import { useClickOutside } from "../../hooks";
-import { Droppable } from "react-beautiful-dnd";
 
 import { Card as CardInterface } from "../../App";
 
@@ -29,6 +29,7 @@ interface ColumnProps {
   addCard: (card: CardInterface, columnId: string) => void;
   updateCard: (card: CardInterface, columnId: string) => void;
   editColumn: (id: string, title: string) => void;
+  currentIndex: number;
 }
 
 interface NewColumnProps {
@@ -112,7 +113,8 @@ const Column: React.FC<ColumnProps> = ({
   cards,
   addCard,
   updateCard,
-  editColumn
+  editColumn,
+  currentIndex
 }) => {
   const [currentTitle, setCurrentTitle] = useState(title);
   const [isEditing, setIsEditing] = useState(false);
@@ -151,50 +153,54 @@ const Column: React.FC<ColumnProps> = ({
   };
 
   return (
-    <Container>
-      <Header>
-        <Title>{currentTitle}</Title>
-        {!isEditing && (
-          <>
-            <EditTitleButton
-              onClick={() => {
-                setIsEditing(true);
-              }}
+    <Draggable draggableId={id} index={currentIndex}>
+      {(provided, snapshot) => (
+        <Container
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+        >
+          <Header>
+            <Title>{currentTitle}</Title>
+            {!isEditing && (
+              <>
+                <EditTitleButton
+                  onClick={() => {
+                    setIsEditing(true);
+                  }}
+                />
+              </>
+            )}
+            <Input
+              isEditing={isEditing}
+              ref={ref as any}
+              rows={1}
+              spellCheck={false}
+              value={currentTitle}
+              onChange={({ target }) => setCurrentTitle(target.value)}
+              onKeyDown={onKeyDown}
             />
-          </>
-        )}
-        <Input
-          isEditing={isEditing}
-          ref={ref as any}
-          rows={1}
-          spellCheck={false}
-          value={currentTitle}
-          onChange={({ target }) => setCurrentTitle(target.value)}
-          onKeyDown={onKeyDown}
-        />
-      </Header>
-      <Droppable droppableId={`${id}`} type="Column">
-        {(provided, snapshot) => (
-          <CardList
-            ref={provided.innerRef}
-            style={{}}
-            {...provided.droppableProps}
-          >
-            {cards.map((card, index) => (
-              <Card
-                currentIndex={index}
-                key={card.id}
-                id={card.id}
-                title={card.title}
-                editCard={editCardTitle}
-              />
-            ))}
-            {provided.placeholder}
-          </CardList>
-        )}
-      </Droppable>
-      <AddNewCard addCard={addCard} columnId={id} />
-    </Container>
+          </Header>
+          <Droppable droppableId={`${id}`} type="Column">
+            {(provided, snapshot) => (
+              <CardList ref={provided.innerRef} {...provided.droppableProps}>
+                {cards.map((card, index) => (
+                  <Card
+                    currentIndex={index}
+                    key={card.id}
+                    id={card.id}
+                    title={card.title}
+                    editCard={editCardTitle}
+                  />
+                ))}
+                {provided.placeholder}
+              </CardList>
+            )}
+          </Droppable>
+          <AddNewCard addCard={addCard} columnId={id} />
+        </Container>
+      )}
+    </Draggable>
   );
 };
 
