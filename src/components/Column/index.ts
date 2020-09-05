@@ -1,1 +1,1 @@
-export { default } from "./Column";
+export { default, NewColumn } from "./Column";

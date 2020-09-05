@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import "./styles.css";
 
-import Column from "./components/Column";
+import Column, { NewColumn } from "./components/Column";
 import AddColumnButton from "./components/AddColumnButton";
 
 export interface Card {
@@ -11,7 +11,7 @@ export interface Card {
 }
 
 export interface Column {
-  id: number;
+  id: string;
   title: string;
   cards: Card[];
 }
@@ -23,36 +23,18 @@ interface AddNewColumnProps {
 
 const AddNewColumn: React.FC<AddNewColumnProps> = ({ columns, setColumns }) => {
   const [isAddingColumn, setIsAddingColumn] = useState(false);
-  const [newColumn, setNewColumn] = useState<Column>({
-    id: columns.length + 1,
-    title: "",
-    cards: []
-  });
 
-  const cancelCardAddition = () => {
+  const cancelColumnAddition = () => {
     setIsAddingColumn(false);
-    setNewColumn((c) => ({ ...c, title: "" }));
   };
 
-  const addCard = (id: number, title: string) => {
+  const addColumn = (id: string, title: string) => {
     setColumns([...columns, { id, title, cards: [] }]);
     setIsAddingColumn(false);
-    setNewColumn({ id: id + 1, title: "", cards: [] });
   };
 
   if (isAddingColumn) {
-    return (
-      <>
-        <Column
-          newColumn
-          id={newColumn.id}
-          title={newColumn.title}
-          cards={newColumn.cards}
-          onSuccess={addCard}
-          onDismiss={cancelCardAddition}
-        />
-      </>
-    );
+    return <NewColumn onSuccess={addColumn} onDismiss={cancelColumnAddition} />;
   }
 
   return <AddColumnButton onClick={() => setIsAddingColumn(true)} />;
@@ -60,11 +42,11 @@ const AddNewColumn: React.FC<AddNewColumnProps> = ({ columns, setColumns }) => {
 
 export default function App() {
   const [columns, setColumns] = useState<Column[]>([
-    { id: 1, title: "Teste", cards: [] },
-    { id: 2, title: "Teste", cards: [] }
+    { id: "1", title: "Teste", cards: [] },
+    { id: "2", title: "Teste", cards: [] }
   ]);
 
-  const editColumnTitle = (id: number, title: string) => {
+  const editColumnTitle = (id: string, title: string) => {
     setColumns(
       columns.map((column) =>
         column.id === id ? { ...column, title } : column
@@ -72,17 +54,28 @@ export default function App() {
     );
   };
 
-  const setCards = (card: Card, columnId: number) => {
+  const updateCard = (newCard: Card, columnId: string) => {
     setColumns(
       columns.map((column) =>
         column.id === columnId
           ? {
               ...column,
-              cards: column.cards.find((ccard) => ccard.id === card.id)
-                ? column.cards.map((ccard) =>
-                    ccard.id === card.id ? card : ccard
-                  )
-                : [...column.cards, card]
+              cards: column.cards.map((card) =>
+                card.id === newCard.id ? newCard : card
+              )
+            }
+          : column
+      )
+    );
+  };
+
+  const addCard = (newCard: Card, columnId: string) => {
+    setColumns(
+      columns.map((column) =>
+        column.id === columnId
+          ? {
+              ...column,
+              cards: [...column.cards, newCard]
             }
           : column
       )
@@ -98,7 +91,9 @@ export default function App() {
   };
 
   const onDragEnd = (result: DropResult) => {
-    const sourceColumnIndex = Number(result.source.droppableId) - 1;
+    const sourceColumnIndex = columns.findIndex(
+      (column) => column.id === result.source.droppableId
+    );
     const sourceCardIndex = Number(result.source.index);
     const card = { ...columns[sourceColumnIndex].cards[sourceCardIndex] };
 
@@ -106,7 +101,9 @@ export default function App() {
       return;
     }
 
-    const destinationColumnIndex = Number(result.destination.droppableId) - 1;
+    const destinationColumnIndex = columns.findIndex(
+      (column) => column.id === result.destination?.droppableId
+    );
     const destinationCardIndex = result.destination.index;
 
     if (sourceColumnIndex === destinationColumnIndex) {
@@ -160,8 +157,9 @@ export default function App() {
             id={column.id}
             title={column.title}
             cards={column.cards}
-            setCards={setCards}
-            onSuccess={editColumnTitle}
+            addCard={addCard}
+            updateCard={updateCard}
+            editColumn={editColumnTitle}
           />
         ))}
         <AddNewColumn columns={columns} setColumns={setColumns} />

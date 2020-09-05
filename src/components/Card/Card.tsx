@@ -8,7 +8,7 @@ import { Container, Title, Input, EditTitleButton } from "./styles";
 interface CardProps {
   id: string;
   title: string;
-  onSuccess: (id: string, title: string) => void;
+  editCard: (id: string, title: string) => void;
   currentIndex: number;
 }
 
@@ -56,7 +56,7 @@ export const NewCard: React.FC<NewCardProps> = ({ onSuccess, onDismiss }) => {
   );
 };
 
-const Card: React.FC<CardProps> = ({ title, id, onSuccess, currentIndex }) => {
+const Card: React.FC<CardProps> = ({ title, id, editCard, currentIndex }) => {
   const [currentTitle, setCurrentTitle] = useState(title);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -80,7 +80,7 @@ const Card: React.FC<CardProps> = ({ title, id, onSuccess, currentIndex }) => {
       e.preventDefault();
       if (currentTitle) {
         setIsEditing(false);
-        onSuccess(id, currentTitle);
+        editCard(id, currentTitle);
       }
     }
     if (e.key === "Escape") {

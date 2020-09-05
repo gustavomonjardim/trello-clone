@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import Card, { NewCard } from "../Card";
 import { useClickOutside } from "../../hooks";
@@ -17,43 +18,83 @@ import {
 } from "./styles";
 
 interface AddNewCardProps {
-  cards: CardInterface[];
-  setCards?: (card: CardInterface, columnId: number) => void;
-  columnId: number;
+  addCard: (card: CardInterface, columnId: string) => void;
+  columnId: string;
 }
 
 interface ColumnProps {
-  id: number;
+  id: string;
   title: string;
   cards: CardInterface[];
-  setCards?: (card: CardInterface, columnId: number) => void;
-  newColumn?: boolean;
-  onSuccess: (id: number, title: string) => void;
-  onDismiss?: () => void;
+  addCard: (card: CardInterface, columnId: string) => void;
+  updateCard: (card: CardInterface, columnId: string) => void;
+  editColumn: (id: string, title: string) => void;
 }
 
-const AddNewCard: React.FC<AddNewCardProps> = ({
-  cards,
-  setCards,
-  columnId
+interface NewColumnProps {
+  onSuccess: (id: string, title: string) => void;
+  onDismiss: () => void;
+}
+
+export const NewColumn: React.FC<NewColumnProps> = ({
+  onSuccess,
+  onDismiss
 }) => {
+  const [currentTitle, setCurrentTitle] = useState("");
+
+  const ref = useRef<HTMLTextAreaElement>();
+
+  useClickOutside(ref, () => {
+    onDismiss();
+  });
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      onSuccess(uuidv4(), currentTitle);
+    }
+    if (e.key === "Escape") {
+      setCurrentTitle("");
+      onDismiss();
+    }
+  };
+
+  return (
+    <Container>
+      <Header>
+        <Title>{currentTitle}</Title>
+        <Input
+          autoFocus
+          isEditing
+          ref={ref as any}
+          rows={1}
+          spellCheck={false}
+          value={currentTitle}
+          onChange={({ target }) => setCurrentTitle(target.value)}
+          onKeyDown={onKeyDown}
+        />
+      </Header>
+    </Container>
+  );
+};
+
+const AddNewCard: React.FC<AddNewCardProps> = ({ addCard, columnId }) => {
   const [isAddingCard, setIsAddingCard] = useState(false);
 
   const cancelCardAddition = () => {
     setIsAddingCard(false);
   };
 
-  const addCard = (id: string, title: string) => {
-    if (typeof setCards === "function") {
-      setCards({ id, title }, columnId);
-    }
+  const onSuccess = (id: string, title: string) => {
+    addCard({ id, title }, columnId);
+
     setIsAddingCard(false);
   };
 
   if (isAddingCard) {
     return (
       <>
-        <NewCard onSuccess={addCard} onDismiss={cancelCardAddition} />
+        <NewCard onSuccess={onSuccess} onDismiss={cancelCardAddition} />
       </>
     );
   }
@@ -66,26 +107,21 @@ const AddNewCard: React.FC<AddNewCardProps> = ({
 };
 
 const Column: React.FC<ColumnProps> = ({
-  newColumn = false,
   id,
   title,
   cards,
-  setCards,
-  onSuccess,
-  onDismiss
+  addCard,
+  updateCard,
+  editColumn
 }) => {
   const [currentTitle, setCurrentTitle] = useState(title);
-  const [isEditing, setIsEditing] = useState(newColumn);
+  const [isEditing, setIsEditing] = useState(false);
 
   const ref = useRef<HTMLTextAreaElement>();
 
   useClickOutside(ref, () => {
     if (isEditing) {
       setIsEditing(false);
-
-      if (typeof onDismiss === "function") {
-        onDismiss();
-      }
     }
   });
 
@@ -102,21 +138,16 @@ const Column: React.FC<ColumnProps> = ({
     if (e.key === "Enter") {
       e.preventDefault();
       setIsEditing(false);
-      onSuccess(id, currentTitle);
+      editColumn(id, currentTitle);
     }
     if (e.key === "Escape") {
       setCurrentTitle(title);
       setIsEditing(false);
-      if (typeof onDismiss === "function") {
-        onDismiss();
-      }
     }
   };
 
   const editCardTitle = (cardId: string, title: string) => {
-    if (typeof setCards === "function") {
-      setCards({ id: cardId, title }, id);
-    }
+    updateCard({ id: cardId, title }, id);
   };
 
   return (
@@ -155,16 +186,14 @@ const Column: React.FC<ColumnProps> = ({
                 key={card.id}
                 id={card.id}
                 title={card.title}
-                onSuccess={editCardTitle}
+                editCard={editCardTitle}
               />
             ))}
             {provided.placeholder}
           </CardList>
         )}
       </Droppable>
-      {!newColumn && (
-        <AddNewCard cards={cards} setCards={setCards} columnId={id} />
-      )}
+      <AddNewCard addCard={addCard} columnId={id} />
     </Container>
   );
 };
