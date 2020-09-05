@@ -85,8 +85,17 @@ export default function App() {
     );
   };
 
+  const onColumnDrag = (result: DropResult) => {
+    setColumns(
+      reorderList<ColumnInterface>(
+        columns,
+        result.source.index,
+        (result.destination as DraggableLocation).index
+      )
+    );
+  };
+
   const onDragEnd = (result: DropResult) => {
-    console.log(result);
     if (!result.destination) {
       return;
     }
@@ -96,13 +105,10 @@ export default function App() {
       return;
     }
 
-    setColumns(
-      reorderList<ColumnInterface>(
-        columns,
-        result.source.index,
-        result.destination.index
-      )
-    );
+    if (result.type === "column") {
+      onColumnDrag(result);
+      return;
+    }
   };
 
   return (
