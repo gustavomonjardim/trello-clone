@@ -14,10 +14,12 @@ body,
 }
 
 body {
+  display: block;
   background-color: #0079bf;
 }
 
 .App {
+  box-sizing: border-box;
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
@@ -25,8 +27,29 @@ body {
   height: 100%;
   gap: 12px;
   padding: 12px;
-  overflow: auto;
+  overflow-y: hidden;
+  overflow-x: auto;
   min-width: 100%;
+}
+
+/* width */
+.App::-webkit-scrollbar {
+  height: 12px;
+}
+/* Track */
+.App::-webkit-scrollbar-track {
+  background: #0367a3;
+  border-radius: 3px;
+  margin: 0 12px;
+}
+/* Handle */
+.App::-webkit-scrollbar-thumb {
+  background: #72a4c7;
+  border-radius: 3px;
+}
+/* Handle on hover */
+.App::-webkit-scrollbar-thumb:hover {
+  background: #72a4c7;
 }
 
 .list {

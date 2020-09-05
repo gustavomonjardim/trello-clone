@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 
@@ -16,11 +16,6 @@ import {
   Input,
   EditTitleButton
 } from "./styles";
-
-interface AddNewCardProps {
-  addCard: (card: CardInterface, columnId: string) => void;
-  columnId: string;
-}
 
 interface ColumnProps {
   id: string;
@@ -79,33 +74,7 @@ export const NewColumn: React.FC<NewColumnProps> = ({
   );
 };
 
-const AddNewCard: React.FC<AddNewCardProps> = ({ addCard, columnId }) => {
-  const [isAddingCard, setIsAddingCard] = useState(false);
-
-  const cancelCardAddition = () => {
-    setIsAddingCard(false);
-  };
-
-  const onSuccess = (id: string, title: string) => {
-    addCard({ id, title }, columnId);
-
-    setIsAddingCard(false);
-  };
-
-  if (isAddingCard) {
-    return (
-      <>
-        <NewCard onSuccess={onSuccess} onDismiss={cancelCardAddition} />
-      </>
-    );
-  }
-
-  return (
-    <Button onClick={() => setIsAddingCard(true)}>
-      Adicionar outro cartão
-    </Button>
-  );
-};
+let cardListRef: HTMLDivElement | null = null;
 
 const Column: React.FC<ColumnProps> = ({
   id,
@@ -118,8 +87,14 @@ const Column: React.FC<ColumnProps> = ({
 }) => {
   const [currentTitle, setCurrentTitle] = useState(title);
   const [isEditing, setIsEditing] = useState(false);
-
+  const [isAddingCard, setIsAddingCard] = useState(false);
   const ref = useRef<HTMLTextAreaElement>();
+
+  const cardListRefCallback = useCallback((node: HTMLDivElement | null) => {
+    if (node !== null) {
+      cardListRef = node;
+    }
+  }, []);
 
   useClickOutside(ref, () => {
     if (isEditing) {
@@ -136,6 +111,12 @@ const Column: React.FC<ColumnProps> = ({
     }
   }, [isEditing]);
 
+  useEffect(() => {
+    if (cardListRef) {
+      cardListRef.scrollTop = cardListRef.scrollHeight;
+    }
+  }, [isAddingCard]);
+
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -150,6 +131,15 @@ const Column: React.FC<ColumnProps> = ({
 
   const editCardTitle = (cardId: string, title: string) => {
     updateCard({ id: cardId, title }, id);
+  };
+
+  const onNewCardDissmiss = () => {
+    setIsAddingCard(false);
+  };
+
+  const onNewCardSuccess = (cardId: string, title: string) => {
+    addCard({ id: cardId, title }, id);
+    setIsAddingCard(false);
   };
 
   return (
@@ -183,7 +173,13 @@ const Column: React.FC<ColumnProps> = ({
           </Header>
           <Droppable droppableId={id} type="card">
             {(provided, snapshot) => (
-              <CardList ref={provided.innerRef} {...provided.droppableProps}>
+              <CardList
+                ref={(realRef) => {
+                  provided.innerRef(realRef);
+                  cardListRefCallback(realRef);
+                }}
+                {...provided.droppableProps}
+              >
                 {cards.map((card, index) => (
                   <Card
                     currentIndex={index}
@@ -193,11 +189,21 @@ const Column: React.FC<ColumnProps> = ({
                     editCard={editCardTitle}
                   />
                 ))}
+                {isAddingCard && (
+                  <NewCard
+                    onSuccess={onNewCardSuccess}
+                    onDismiss={onNewCardDissmiss}
+                  />
+                )}
                 {provided.placeholder}
               </CardList>
             )}
           </Droppable>
-          <AddNewCard addCard={addCard} columnId={id} />
+          {!isAddingCard && (
+            <Button onClick={() => setIsAddingCard(true)}>
+              Adicionar outro cartão
+            </Button>
+          )}
         </Container>
       )}
     </Draggable>

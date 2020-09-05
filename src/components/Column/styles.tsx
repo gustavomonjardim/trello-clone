@@ -11,21 +11,44 @@ export const Container = styled.div`
   width: 272px;
   max-width: 272px;
   min-width: 272px;
+  max-height: 100%;
   border-radius: 3px;
-  overflow: none;
-  padding: 0 8px 8px;
+  padding: 0 4px 8px;
 `;
 
 export const CardList = styled.div`
   min-height: 1px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 4px 4px 0 4px;
+  margin-bottom: 4px;
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #dadbe2;
+    border-radius: 5px;
+    margin: 0 12px;
+  }
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #bfc3cd;
+    border-radius: 5px;
+  }
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #bfc3cd;
+  }
 `;
 
 export const Button = styled.button`
-  width: 100%;
   color: #5e6c84;
   background-color: transparent;
   border-radius: 3px;
   padding: 8px;
+  margin: 0 4px;
   font-size: 14px;
   cursor: pointer;
 
@@ -38,7 +61,7 @@ export const Button = styled.button`
 `;
 
 export const Header = styled.div`
-  padding: 8px 0px;
+  padding: 8px 4px;
   position: relative;
 `;
 
@@ -85,4 +108,5 @@ export const EditTitleButton = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
+  margin: 0 4px;
 `;
