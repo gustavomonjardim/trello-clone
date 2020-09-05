@@ -14,6 +14,7 @@ export const Container = styled.div`
   max-height: 100%;
   border-radius: 3px;
   padding: 0 4px 8px;
+  margin-right: 12px;
 `;
 
 export const CardList = styled.div`

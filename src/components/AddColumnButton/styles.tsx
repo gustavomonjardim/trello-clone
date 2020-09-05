@@ -13,6 +13,8 @@ export const Container = styled.button`
   font-size: 14px;
   line-height: 20px;
   font-weight: 400;
+  margin-right: 12px;
+  user-select: none;
 
   &:hover,
   &:focus {

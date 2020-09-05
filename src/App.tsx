@@ -112,33 +112,42 @@ export default function App() {
   };
 
   return (
-    <div className="App">
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId={`parent`} direction="horizontal" type="column">
-          {(provided, snapshot) => (
-            <div
-              className="list"
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-            >
-              {columns.map((column, index) => (
-                <Column
-                  currentIndex={index}
-                  key={column.id}
-                  id={column.id}
-                  title={column.title}
-                  cards={column.cards}
-                  addCard={addCard}
-                  updateCard={updateCard}
-                  editColumn={updateColumn}
-                />
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-        <AddNewColumn columns={columns} setColumns={setColumns} />
-      </DragDropContext>
-    </div>
+    <>
+      <div className="header"></div>
+      <div className="App">
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable
+            droppableId={`parent`}
+            direction="horizontal"
+            type="column"
+          >
+            {(provided, snapshot) => (
+              <div
+                className="list"
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
+                {columns.map((column, index) => (
+                  <Column
+                    currentIndex={index}
+                    key={column.id}
+                    id={column.id}
+                    title={column.title}
+                    cards={column.cards}
+                    addCard={addCard}
+                    updateCard={updateCard}
+                    editColumn={updateColumn}
+                  />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+          <div>
+            <AddNewColumn columns={columns} setColumns={setColumns} />
+          </div>
+        </DragDropContext>
+      </div>
+    </>
   );
 }
