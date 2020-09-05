@@ -34,6 +34,11 @@ export const Input = styled.textarea`
   min-height: 20px;
   display: block;
 
+  ::placeholder {
+    font-weight: 400;
+    color: #838da1;
+  }
+
   &:focus {
     outline: none;
   }

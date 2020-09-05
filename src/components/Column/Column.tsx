@@ -4,6 +4,7 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 
 import Card, { NewCard } from "../Card";
 import { useClickOutside } from "../../hooks";
+import PlusIcon from "../../assets/PlusIcon";
 
 import { Card as CardInterface } from "../../types";
 
@@ -14,7 +15,8 @@ import {
   Title,
   Button,
   Input,
-  EditTitleButton
+  EditTitleButton,
+  IconContainer
 } from "./styles";
 
 interface ColumnProps {
@@ -47,7 +49,9 @@ export const NewColumn: React.FC<NewColumnProps> = ({
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      onSuccess(uuidv4(), currentTitle);
+      if (currentTitle) {
+        onSuccess(uuidv4(), currentTitle);
+      }
     }
     if (e.key === "Escape") {
       setCurrentTitle("");
@@ -62,6 +66,7 @@ export const NewColumn: React.FC<NewColumnProps> = ({
         <Input
           autoFocus
           isEditing
+          placeholder="Insira o título da lista..."
           ref={ref as any}
           rows={1}
           spellCheck={false}
@@ -201,7 +206,14 @@ const Column: React.FC<ColumnProps> = ({
           </Droppable>
           {!isAddingCard && (
             <Button onClick={() => setIsAddingCard(true)}>
-              Adicionar outro cartão
+              <IconContainer>
+                <PlusIcon />
+              </IconContainer>
+              <span>
+                {cards?.length >= 1
+                  ? "Adicionar outro cartão"
+                  : "Adicionar um cartão"}
+              </span>
             </Button>
           )}
         </Container>

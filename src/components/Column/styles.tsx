@@ -21,7 +21,7 @@ export const CardList = styled.div`
   min-height: 1px;
   height: 100%;
   overflow-y: auto;
-  padding: 4px 4px 0 4px;
+  padding: 0 4px;
   margin-bottom: 4px;
 
   ::-webkit-scrollbar {
@@ -45,13 +45,19 @@ export const CardList = styled.div`
 `;
 
 export const Button = styled.button`
+  display: flex;
+  align-items: flex-end;
   color: #5e6c84;
   background-color: transparent;
   border-radius: 3px;
-  padding: 8px;
+  padding: 4px 8px;
   margin: 0 4px;
   font-size: 14px;
   cursor: pointer;
+
+  & > span {
+    line-height: 20px;
+  }
 
   &:hover,
   &:focus {
@@ -97,9 +103,22 @@ export const Input = styled.textarea<InputProps>`
   display: block;
   transition: all 0.1s linear;
 
+  ::placeholder {
+    font-weight: 400;
+    color: #838da1;
+  }
+
   &:focus {
     outline: none;
   }
+`;
+
+export const IconContainer = styled.div`
+  margin-right: 4px;
+  height: 20px;
+  opacity: 0.8;
+  display: flex;
+  color: #5e6c84;
 `;
 
 export const EditTitleButton = styled.div`

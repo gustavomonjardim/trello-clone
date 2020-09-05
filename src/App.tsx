@@ -41,14 +41,16 @@ const AddNewColumn: React.FC<AddNewColumnProps> = ({ columns, setColumns }) => {
     return <NewColumn onSuccess={addColumn} onDismiss={cancelColumnAddition} />;
   }
 
-  return <AddColumnButton onClick={() => setIsAddingColumn(true)} />;
+  return (
+    <AddColumnButton
+      isFirst={columns?.length === 0}
+      onClick={() => setIsAddingColumn(true)}
+    />
+  );
 };
 
 export default function App() {
-  const [columns, setColumns] = useState<ColumnInterface[]>([
-    { id: "1", title: "Teste", cards: [] },
-    { id: "2", title: "Teste", cards: [] }
-  ]);
+  const [columns, setColumns] = useState<ColumnInterface[]>([]);
 
   const updateColumn = (id: string, title: string) => {
     setColumns(updateColumnById(columns, { id, title }));

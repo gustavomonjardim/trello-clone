@@ -46,6 +46,7 @@ export const NewCard: React.FC<NewCardProps> = ({ onSuccess, onDismiss }) => {
       <Input
         autoFocus
         ref={ref as any}
+        placeholder="Insira um título para este cartão..."
         rows={1}
         value={currentTitle}
         spellCheck={false}
