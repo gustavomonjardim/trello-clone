@@ -5,7 +5,7 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 import Card, { NewCard } from "../Card";
 import { useClickOutside } from "../../hooks";
 
-import { Card as CardInterface } from "../../App";
+import { Card as CardInterface } from "../../types";
 
 import {
   Container,
@@ -181,7 +181,7 @@ const Column: React.FC<ColumnProps> = ({
               onKeyDown={onKeyDown}
             />
           </Header>
-          <Droppable droppableId={`${id}`} type="Column">
+          <Droppable droppableId={id} type="card">
             {(provided, snapshot) => (
               <CardList ref={provided.innerRef} {...provided.droppableProps}>
                 {cards.map((card, index) => (

@@ -1,24 +1,28 @@
 import React, { useState } from "react";
-import { DragDropContext, DropResult, Droppable } from "react-beautiful-dnd";
+import {
+  DragDropContext,
+  DropResult,
+  Droppable,
+  DraggableLocation
+} from "react-beautiful-dnd";
 import "./styles.css";
+
+import {
+  reorderList,
+  switchCards,
+  updateColumnById,
+  addCardToColumn,
+  updateCardById
+} from "./utils/listUtils";
 
 import Column, { NewColumn } from "./components/Column";
 import AddColumnButton from "./components/AddColumnButton";
 
-export interface Card {
-  id: string;
-  title: string;
-}
-
-export interface Column {
-  id: string;
-  title: string;
-  cards: Card[];
-}
+import { Card, Column as ColumnInterface } from "./types";
 
 interface AddNewColumnProps {
-  columns: Column[];
-  setColumns: React.Dispatch<React.SetStateAction<Column[]>>;
+  columns: ColumnInterface[];
+  setColumns: React.Dispatch<React.SetStateAction<ColumnInterface[]>>;
 }
 
 const AddNewColumn: React.FC<AddNewColumnProps> = ({ columns, setColumns }) => {
@@ -41,132 +45,70 @@ const AddNewColumn: React.FC<AddNewColumnProps> = ({ columns, setColumns }) => {
 };
 
 export default function App() {
-  const [columns, setColumns] = useState<Column[]>([
+  const [columns, setColumns] = useState<ColumnInterface[]>([
     { id: "1", title: "Teste", cards: [] },
     { id: "2", title: "Teste", cards: [] }
   ]);
 
-  const editColumnTitle = (id: string, title: string) => {
-    setColumns(
-      columns.map((column) =>
-        column.id === id ? { ...column, title } : column
-      )
-    );
+  const updateColumn = (id: string, title: string) => {
+    setColumns(updateColumnById(columns, { id, title }));
   };
 
   const updateCard = (newCard: Card, columnId: string) => {
-    setColumns(
-      columns.map((column) =>
-        column.id === columnId
-          ? {
-              ...column,
-              cards: column.cards.map((card) =>
-                card.id === newCard.id ? newCard : card
-              )
-            }
-          : column
-      )
-    );
+    setColumns(updateCardById(columns, columnId, newCard));
   };
 
   const addCard = (newCard: Card, columnId: string) => {
-    setColumns(
-      columns.map((column) =>
-        column.id === columnId
-          ? {
-              ...column,
-              cards: [...column.cards, newCard]
-            }
-          : column
-      )
-    );
+    setColumns(addCardToColumn(columns, columnId, newCard));
   };
 
-  function reorder<T>(list: T[], startIndex: number, endIndex: number) {
-    const result = Array.from(list);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-
-    return result;
-  }
-
   const onCardDrag = (result: DropResult) => {
-    console.log(result);
     const sourceColumnIndex = columns.findIndex(
       (column) => column.id === result.source.droppableId
     );
-    const sourceCardIndex = Number(result.source.index);
-    const card = { ...columns[sourceColumnIndex].cards[sourceCardIndex] };
-
-    if (!result.destination) {
-      return;
-    }
+    const sourceCardIndex = result.source.index;
 
     const destinationColumnIndex = columns.findIndex(
       (column) => column.id === result.destination?.droppableId
     );
-    const destinationCardIndex = result.destination.index;
+    const destinationCardIndex = (result.destination as DraggableLocation)
+      .index;
 
-    if (sourceColumnIndex === destinationColumnIndex) {
-      setColumns(
-        columns.map((column, index) =>
-          index === sourceColumnIndex
-            ? {
-                ...column,
-                cards: reorder<Card>(
-                  column.cards,
-                  sourceCardIndex,
-                  destinationCardIndex
-                )
-              }
-            : column
-        )
-      );
-      return;
-    }
-
-    setColumns(
-      columns.map((column, index) => {
-        if (index === sourceColumnIndex) {
-          return {
-            ...column,
-            cards: column.cards.filter(
-              (ccard, cindex) => cindex !== sourceCardIndex
-            )
-          };
-        }
-        if (index === destinationColumnIndex) {
-          const temp = [...column.cards];
-          temp.splice(destinationCardIndex, 0, card);
-
-          return {
-            ...column,
-            cards: temp
-          };
-        }
-        return column;
-      })
+    setColumns(() =>
+      switchCards(
+        columns,
+        sourceColumnIndex,
+        sourceCardIndex,
+        destinationColumnIndex,
+        destinationCardIndex
+      )
     );
   };
 
   const onDragEnd = (result: DropResult) => {
-    if (result.type === "Column") {
-      onCardDrag(result);
-    } else {
-      if (!result.destination) {
-        return;
-      }
-
-      setColumns(
-        reorder<Column>(columns, result.source.index, result.destination.index)
-      );
+    console.log(result);
+    if (!result.destination) {
+      return;
     }
+
+    if (result.type === "card") {
+      onCardDrag(result);
+      return;
+    }
+
+    setColumns(
+      reorderList<ColumnInterface>(
+        columns,
+        result.source.index,
+        result.destination.index
+      )
+    );
   };
 
   return (
     <div className="App">
       <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId={`parent`} direction="horizontal" type="Box">
+        <Droppable droppableId={`parent`} direction="horizontal" type="column">
           {(provided, snapshot) => (
             <div
               className="list"
@@ -182,7 +124,7 @@ export default function App() {
                   cards={column.cards}
                   addCard={addCard}
                   updateCard={updateCard}
-                  editColumn={editColumnTitle}
+                  editColumn={updateColumn}
                 />
               ))}
               {provided.placeholder}
