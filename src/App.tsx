@@ -22,6 +22,7 @@ import {
 
 import Column, { NewColumn } from "./components/Column";
 import AddColumnButton from "./components/AddColumnButton";
+import { useLocalStorage } from "./hooks";
 
 import { Card, Column as ColumnInterface } from "./types";
 import { Board, Header, List, Trash } from "./styles";
@@ -56,10 +57,10 @@ const AddNewColumn: React.FC<AddNewColumnProps> = ({ columns, setColumns }) => {
 };
 
 export default function App() {
-  const [columns, setColumns] = useState<ColumnInterface[]>([]);
+  const [columns, setColumns] = useLocalStorage<ColumnInterface[]>("board", []);
   const [isColumnTrashVisible, setIsColumnTrashVisible] = useState(false);
   const [isCardTrashVisible, setIsCardTrashVisible] = useState(false);
-  const [isTrashFocused, setIsCardTrashFocused] = useState(false);
+  const [isTrashFocused, setIsTrashFocused] = useState(false);
 
   const updateColumn = (id: string, title: string) => {
     setColumns(updateColumnById(columns, { id, title }));
@@ -151,10 +152,13 @@ export default function App() {
 
   const onDragUpdate = (initial: DragUpdate, provided: ResponderProvided) => {
     console.log(initial);
-    if (initial.destination?.droppableId === "column-trash") {
-      setIsCardTrashFocused(true);
+    if (
+      initial.destination?.droppableId === "column-trash" ||
+      initial.destination?.droppableId === "card-trash"
+    ) {
+      setIsTrashFocused(true);
     } else {
-      setIsCardTrashFocused(false);
+      setIsTrashFocused(false);
     }
   };
 

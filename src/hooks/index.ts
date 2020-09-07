@@ -1,3 +1,4 @@
 import useClickOutside from "./useClickOutside";
+import useLocalStorage from "./useLocalStorage";
 
-export { useClickOutside };
+export { useClickOutside, useLocalStorage };
