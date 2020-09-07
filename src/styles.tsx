@@ -1,6 +1,12 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
+
+interface TrashProps {
+  isVisible: boolean;
+  isFocused: boolean;
+}
 
 export const Board = styled.div`
+  position: relative;
   flex: 1;
   box-sizing: border-box;
   display: flex;
@@ -10,24 +16,24 @@ export const Board = styled.div`
   padding: 12px;
   margin-bottom: 12px;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
 
-  &::-webkit-scrollbar {
+  ::-webkit-scrollbar {
     height: 12px;
   }
 
-  &::-webkit-scrollbar-track {
+  ::-webkit-scrollbar-track {
     background: #0367a3;
     border-radius: 3px;
     margin: 0 12px;
   }
 
-  &::-webkit-scrollbar-thumb {
+  ::-webkit-scrollbar-thumb {
     background: #72a4c7;
     border-radius: 3px;
   }
 
-  &::-webkit-scrollbar-thumb:hover {
+  ::-webkit-scrollbar-thumb:hover {
     background: #72a4c7;
   }
 `;
@@ -44,4 +50,23 @@ export const List = styled.div`
   flex-wrap: nowrap;
   align-items: flex-start;
   height: 100%;
+`;
+
+export const Trash = styled.div<TrashProps>`
+  visibility: ${(props) => (props.isVisible ? "visible" : "hidden")};
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100px;
+  height: 100px;
+  background-color: ${(props) => (props.isFocused ? "green" : "red")};
+  z-index: 1000;
+  transition: all 0.2s ease-in-out;
+  transform: scale(1);
+
+  ${(props) =>
+    props.isFocused &&
+    css`
+      transform: scale(1.2);
+    `};
 `;

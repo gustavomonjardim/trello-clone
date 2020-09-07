@@ -26,6 +26,10 @@ export function addCardToColumn(
   );
 }
 
+export function deleteColumnById(columns: Column[], columnId: string) {
+  return columns.filter((column) => column.id !== columnId);
+}
+
 export function updateCardById(
   columns: Column[],
   columnId: string,
@@ -38,6 +42,21 @@ export function updateCardById(
           cards: column.cards.map((card) =>
             card.id === newCard.id ? newCard : card
           )
+        }
+      : column
+  );
+}
+
+export function deleteCardById(
+  columns: Column[],
+  columnId: string,
+  cardId: string
+) {
+  return columns.map((column) =>
+    column.id === columnId
+      ? {
+          ...column,
+          cards: column.cards.filter((card) => card.id !== cardId)
         }
       : column
   );

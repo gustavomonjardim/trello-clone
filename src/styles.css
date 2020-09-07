@@ -15,7 +15,6 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
 }
 
 #root::webkit-scroll-bar {

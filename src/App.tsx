@@ -3,7 +3,10 @@ import {
   DragDropContext,
   DropResult,
   Droppable,
-  DraggableLocation
+  DraggableLocation,
+  DragStart,
+  DragUpdate,
+  ResponderProvided
 } from "react-beautiful-dnd";
 import "./styles.css";
 
@@ -12,14 +15,16 @@ import {
   switchCards,
   updateColumnById,
   addCardToColumn,
-  updateCardById
+  updateCardById,
+  deleteColumnById,
+  deleteCardById
 } from "./utils/listUtils";
 
 import Column, { NewColumn } from "./components/Column";
 import AddColumnButton from "./components/AddColumnButton";
 
 import { Card, Column as ColumnInterface } from "./types";
-import { Board, Header, List } from "./styles";
+import { Board, Header, List, Trash } from "./styles";
 
 interface AddNewColumnProps {
   columns: ColumnInterface[];
@@ -52,6 +57,9 @@ const AddNewColumn: React.FC<AddNewColumnProps> = ({ columns, setColumns }) => {
 
 export default function App() {
   const [columns, setColumns] = useState<ColumnInterface[]>([]);
+  const [isColumnTrashVisible, setIsColumnTrashVisible] = useState(false);
+  const [isCardTrashVisible, setIsCardTrashVisible] = useState(false);
+  const [isTrashFocused, setIsCardTrashFocused] = useState(false);
 
   const updateColumn = (id: string, title: string) => {
     setColumns(updateColumnById(columns, { id, title }));
@@ -99,7 +107,22 @@ export default function App() {
   };
 
   const onDragEnd = (result: DropResult) => {
+    setIsColumnTrashVisible(false);
+    setIsCardTrashVisible(false);
+
     if (!result.destination) {
+      return;
+    }
+
+    if (result.destination.droppableId === "column-trash") {
+      setColumns(deleteColumnById(columns, result.draggableId));
+      return;
+    }
+
+    if (result.destination.droppableId === "card-trash") {
+      const cardId = result.draggableId;
+      const columnId = result.source.droppableId;
+      setColumns(deleteCardById(columns, columnId, cardId));
       return;
     }
 
@@ -114,39 +137,78 @@ export default function App() {
     }
   };
 
+  const onDragStart = (initial: DragStart, provided: ResponderProvided) => {
+    if (initial.type === "column") {
+      setIsColumnTrashVisible(true);
+      return;
+    }
+
+    if (initial.type === "card") {
+      setIsCardTrashVisible(true);
+      return;
+    }
+  };
+
+  const onDragUpdate = (initial: DragUpdate, provided: ResponderProvided) => {
+    console.log(initial);
+    if (initial.destination?.droppableId === "column-trash") {
+      setIsCardTrashFocused(true);
+    } else {
+      setIsCardTrashFocused(false);
+    }
+  };
+
   return (
-    <>
+    <DragDropContext
+      onDragStart={onDragStart}
+      onDragUpdate={onDragUpdate}
+      onDragEnd={onDragEnd}
+    >
       <Header></Header>
       <Board>
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable
-            droppableId={`parent`}
-            direction="horizontal"
-            type="column"
-          >
-            {(provided, snapshot) => (
-              <List ref={provided.innerRef} {...provided.droppableProps}>
-                {columns.map((column, index) => (
-                  <Column
-                    currentIndex={index}
-                    key={column.id}
-                    id={column.id}
-                    title={column.title}
-                    cards={column.cards}
-                    addCard={addCard}
-                    updateCard={updateCard}
-                    editColumn={updateColumn}
-                  />
-                ))}
-                {provided.placeholder}
-              </List>
-            )}
-          </Droppable>
-          <div>
-            <AddNewColumn columns={columns} setColumns={setColumns} />
-          </div>
-        </DragDropContext>
+        <Droppable droppableId="column-trash" type="column">
+          {(provided, snapshot) => (
+            <Trash
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              isVisible={isColumnTrashVisible}
+              isFocused={isTrashFocused}
+            />
+          )}
+        </Droppable>
+        <Droppable droppableId="card-trash" type="card">
+          {(provided, snapshot) => (
+            <Trash
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              isVisible={isCardTrashVisible}
+              isFocused={isTrashFocused}
+            />
+          )}
+        </Droppable>
+        <Droppable droppableId="board" direction="horizontal" type="column">
+          {(provided, snapshot) => (
+            <List ref={provided.innerRef} {...provided.droppableProps}>
+              {columns.map((column, index) => (
+                <Column
+                  currentIndex={index}
+                  key={column.id}
+                  id={column.id}
+                  title={column.title}
+                  cards={column.cards}
+                  addCard={addCard}
+                  updateCard={updateCard}
+                  editColumn={updateColumn}
+                />
+              ))}
+              {provided.placeholder}
+            </List>
+          )}
+        </Droppable>
+        <div>
+          <AddNewColumn columns={columns} setColumns={setColumns} />
+        </div>
       </Board>
-    </>
+    </DragDropContext>
   );
 }
