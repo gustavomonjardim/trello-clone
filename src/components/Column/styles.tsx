@@ -11,7 +11,7 @@ export const Container = styled.div`
   width: 272px;
   max-width: 272px;
   min-width: 272px;
-  max-height: 100%;
+  /* max-height: 100%; */
   border-radius: 3px;
   padding: 0 4px 8px;
   margin-right: 12px;
@@ -19,8 +19,8 @@ export const Container = styled.div`
 
 export const CardList = styled.div`
   min-height: 1px;
-  height: 100%;
-  overflow-y: auto;
+  /* height: 100%; */
+  /* overflow-y: auto; */
   padding: 0 4px;
   margin-bottom: 4px;
 

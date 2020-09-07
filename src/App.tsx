@@ -19,6 +19,7 @@ import Column, { NewColumn } from "./components/Column";
 import AddColumnButton from "./components/AddColumnButton";
 
 import { Card, Column as ColumnInterface } from "./types";
+import { Board, Header, List } from "./styles";
 
 interface AddNewColumnProps {
   columns: ColumnInterface[];
@@ -115,8 +116,8 @@ export default function App() {
 
   return (
     <>
-      <div className="header"></div>
-      <div className="App">
+      <Header></Header>
+      <Board>
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable
             droppableId={`parent`}
@@ -124,11 +125,7 @@ export default function App() {
             type="column"
           >
             {(provided, snapshot) => (
-              <div
-                className="list"
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-              >
+              <List ref={provided.innerRef} {...provided.droppableProps}>
                 {columns.map((column, index) => (
                   <Column
                     currentIndex={index}
@@ -142,14 +139,14 @@ export default function App() {
                   />
                 ))}
                 {provided.placeholder}
-              </div>
+              </List>
             )}
           </Droppable>
           <div>
             <AddNewColumn columns={columns} setColumns={setColumns} />
           </div>
         </DragDropContext>
-      </div>
+      </Board>
     </>
   );
 }
