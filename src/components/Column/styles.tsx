@@ -11,37 +11,16 @@ export const Container = styled.div`
   width: 272px;
   max-width: 272px;
   min-width: 272px;
-  max-height: 100%;
   border-radius: 3px;
   padding: 0 4px 8px;
   margin-right: 12px;
+  margin-bottom: 12px;
 `;
 
 export const CardList = styled.div`
   min-height: 1px;
-  height: 100%;
-  overflow-y: auto;
   padding: 0 4px;
   margin-bottom: 4px;
-
-  ::-webkit-scrollbar {
-    width: 4px;
-  }
-  /* Track */
-  ::-webkit-scrollbar-track {
-    background: #dadbe2;
-    border-radius: 5px;
-    margin: 0 12px;
-  }
-  /* Handle */
-  ::-webkit-scrollbar-thumb {
-    background: #bfc3cd;
-    border-radius: 5px;
-  }
-  /* Handle on hover */
-  ::-webkit-scrollbar-thumb:hover {
-    background: #bfc3cd;
-  }
 `;
 
 export const Button = styled.button`

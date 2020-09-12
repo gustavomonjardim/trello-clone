@@ -13,17 +13,7 @@ import {
   DeleteButton
 } from "./styles";
 
-interface CardProps {
-  id: string;
-  columnId: string;
-  title: string;
-  currentIndex: number;
-}
-
-interface NewCardProps {
-  onSuccess: (id: string, title: string) => void;
-  onDismiss: () => void;
-}
+import { CardProps, NewCardProps } from "./types";
 
 export const NewCard: React.FC<NewCardProps> = ({ onSuccess, onDismiss }) => {
   const [currentTitle, setCurrentTitle] = useState("");

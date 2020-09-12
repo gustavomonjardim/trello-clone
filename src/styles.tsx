@@ -1,4 +1,4 @@
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 
 export const Board = styled.div`
   position: relative;
@@ -10,17 +10,16 @@ export const Board = styled.div`
   justify-content: flex-start;
   padding: 12px;
   margin-bottom: 12px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: auto;
 
   ::-webkit-scrollbar {
-    height: 12px;
+    height: 10px;
   }
 
   ::-webkit-scrollbar-track {
     background: #0367a3;
     border-radius: 3px;
-    margin: 0 12px;
+    margin: 12px;
   }
 
   ::-webkit-scrollbar-thumb {
@@ -30,6 +29,14 @@ export const Board = styled.div`
 
   ::-webkit-scrollbar-thumb:hover {
     background: #72a4c7;
+  }
+
+  ::-webkit-scrollbar:vertical {
+    display: none;
+  }
+
+  ::-webkit-scrollbar-corner {
+    display: none;
   }
 `;
 

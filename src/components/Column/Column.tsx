@@ -8,7 +8,7 @@ import PlusIcon from "../../assets/PlusIcon";
 import { useBoard } from "../../context/BoardContext";
 import TrashIcon from "../../assets/TrashIcon";
 
-import { Card as CardInterface } from "../../types";
+import { ColumnProps, NewColumnProps } from "./types";
 
 import {
   Container,
@@ -21,18 +21,6 @@ import {
   IconContainer,
   DeleteButton
 } from "./styles";
-
-interface ColumnProps {
-  id: string;
-  title: string;
-  cards: CardInterface[];
-  currentIndex: number;
-}
-
-interface NewColumnProps {
-  onSuccess: (id: string, title: string) => void;
-  onDismiss: () => void;
-}
 
 export const NewColumn: React.FC<NewColumnProps> = ({
   onSuccess,
