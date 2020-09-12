@@ -1,10 +1,5 @@
 import styled, { css } from "styled-components";
 
-interface TrashProps {
-  isVisible: boolean;
-  isFocused: boolean;
-}
-
 export const Board = styled.div`
   position: relative;
   flex: 1;
@@ -16,7 +11,7 @@ export const Board = styled.div`
   padding: 12px;
   margin-bottom: 12px;
   overflow-x: auto;
-  overflow-y: auto;
+  overflow-y: hidden;
 
   ::-webkit-scrollbar {
     height: 12px;
@@ -43,6 +38,9 @@ export const Header = styled.header`
   width: 100%;
   background-color: #0567a3;
   margin-bottom: 12px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px;
 `;
 
 export const List = styled.div`
@@ -50,23 +48,4 @@ export const List = styled.div`
   flex-wrap: nowrap;
   align-items: flex-start;
   height: 100%;
-`;
-
-export const Trash = styled.div<TrashProps>`
-  visibility: ${(props) => (props.isVisible ? "visible" : "hidden")};
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100px;
-  height: 100px;
-  background-color: ${(props) => (props.isFocused ? "green" : "red")};
-  z-index: 1000;
-  transition: all 0.2s ease-in-out;
-  transform: scale(1);
-
-  ${(props) =>
-    props.isFocused &&
-    css`
-      transform: scale(1.2);
-    `};
 `;

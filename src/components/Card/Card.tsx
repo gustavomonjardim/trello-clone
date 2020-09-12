@@ -1,14 +1,22 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Draggable } from "react-beautiful-dnd";
 import { v4 as uuidv4 } from "uuid";
+import { useBoard } from "../../context/BoardContext";
 
+import TrashIcon from "../../assets/TrashIcon";
 import { useClickOutside } from "../../hooks";
-import { Container, Title, Input, EditTitleButton } from "./styles";
+import {
+  Container,
+  Title,
+  Input,
+  EditTitleButton,
+  DeleteButton
+} from "./styles";
 
 interface CardProps {
   id: string;
+  columnId: string;
   title: string;
-  editCard: (id: string, title: string) => void;
   currentIndex: number;
 }
 
@@ -25,6 +33,13 @@ export const NewCard: React.FC<NewCardProps> = ({ onSuccess, onDismiss }) => {
   useClickOutside(ref, () => {
     onDismiss();
   });
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.style.height = "auto";
+      ref.current.style.height = ref.current.scrollHeight + "px";
+    }
+  }, [currentTitle]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
@@ -57,7 +72,8 @@ export const NewCard: React.FC<NewCardProps> = ({ onSuccess, onDismiss }) => {
   );
 };
 
-const Card: React.FC<CardProps> = ({ title, id, editCard, currentIndex }) => {
+const Card: React.FC<CardProps> = ({ title, id, columnId, currentIndex }) => {
+  const { updateCard, deleteCard } = useBoard();
   const [currentTitle, setCurrentTitle] = useState(title);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -76,12 +92,19 @@ const Card: React.FC<CardProps> = ({ title, id, editCard, currentIndex }) => {
     }
   }, [isEditing]);
 
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.style.height = "auto";
+      ref.current.style.height = ref.current.scrollHeight + "px";
+    }
+  }, [currentTitle]);
+
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       if (currentTitle) {
         setIsEditing(false);
-        editCard(id, currentTitle);
+        updateCard({ id, title: currentTitle }, columnId);
       }
     }
     if (e.key === "Escape") {
@@ -118,6 +141,13 @@ const Card: React.FC<CardProps> = ({ title, id, editCard, currentIndex }) => {
               onKeyDown={onKeyDown}
             />
           )}
+          <DeleteButton
+            onClick={() => {
+              deleteCard(columnId, id);
+            }}
+          >
+            <TrashIcon />
+          </DeleteButton>
         </Container>
       )}
     </Draggable>

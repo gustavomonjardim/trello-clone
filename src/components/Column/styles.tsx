@@ -11,7 +11,7 @@ export const Container = styled.div`
   width: 272px;
   max-width: 272px;
   min-width: 272px;
-  /* max-height: 100%; */
+  max-height: 100%;
   border-radius: 3px;
   padding: 0 4px 8px;
   margin-right: 12px;
@@ -19,8 +19,8 @@ export const Container = styled.div`
 
 export const CardList = styled.div`
   min-height: 1px;
-  /* height: 100%; */
-  /* overflow-y: auto; */
+  height: 100%;
+  overflow-y: auto;
   padding: 0 4px;
   margin-bottom: 4px;
 
@@ -70,6 +70,7 @@ export const Button = styled.button`
 export const Header = styled.div`
   padding: 8px 4px;
   position: relative;
+  display: flex;
 `;
 
 export const Title = styled.h2`
@@ -129,4 +130,20 @@ export const EditTitleButton = styled.div`
   left: 0;
   right: 0;
   margin: 0 4px;
+`;
+
+export const DeleteButton = styled.button`
+  align-self: flex-start;
+  position: relative;
+  color: #42526e;
+  background-color: transparent;
+  padding: 4px;
+  border-radius: 3px;
+  opacity: 0.8;
+
+  :hover {
+    opacity: 1;
+    color: #172b4d;
+    background-color: rgba(9, 30, 66, 0.08);
+  }
 `;

@@ -5,6 +5,8 @@ import { Draggable, Droppable } from "react-beautiful-dnd";
 import Card, { NewCard } from "../Card";
 import { useClickOutside } from "../../hooks";
 import PlusIcon from "../../assets/PlusIcon";
+import { useBoard } from "../../context/BoardContext";
+import TrashIcon from "../../assets/TrashIcon";
 
 import { Card as CardInterface } from "../../types";
 
@@ -16,16 +18,14 @@ import {
   Button,
   Input,
   EditTitleButton,
-  IconContainer
+  IconContainer,
+  DeleteButton
 } from "./styles";
 
 interface ColumnProps {
   id: string;
   title: string;
   cards: CardInterface[];
-  addCard: (card: CardInterface, columnId: string) => void;
-  updateCard: (card: CardInterface, columnId: string) => void;
-  editColumn: (id: string, title: string) => void;
   currentIndex: number;
 }
 
@@ -45,6 +45,13 @@ export const NewColumn: React.FC<NewColumnProps> = ({
   useClickOutside(ref, () => {
     onDismiss();
   });
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.style.height = "auto";
+      ref.current.style.height = ref.current.scrollHeight + "px";
+    }
+  }, [currentTitle]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
@@ -81,15 +88,8 @@ export const NewColumn: React.FC<NewColumnProps> = ({
 
 let cardListRef: HTMLDivElement | null = null;
 
-const Column: React.FC<ColumnProps> = ({
-  id,
-  title,
-  cards,
-  addCard,
-  updateCard,
-  editColumn,
-  currentIndex
-}) => {
+const Column: React.FC<ColumnProps> = ({ id, title, cards, currentIndex }) => {
+  const { updateColumn, deleteColumn, addCard } = useBoard();
   const [currentTitle, setCurrentTitle] = useState(title);
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingCard, setIsAddingCard] = useState(false);
@@ -117,6 +117,13 @@ const Column: React.FC<ColumnProps> = ({
   }, [isEditing]);
 
   useEffect(() => {
+    if (ref.current) {
+      ref.current.style.height = "auto";
+      ref.current.style.height = ref.current.scrollHeight + "px";
+    }
+  }, [currentTitle]);
+
+  useEffect(() => {
     if (cardListRef) {
       cardListRef.scrollTop = cardListRef.scrollHeight;
     }
@@ -126,16 +133,12 @@ const Column: React.FC<ColumnProps> = ({
     if (e.key === "Enter") {
       e.preventDefault();
       setIsEditing(false);
-      editColumn(id, currentTitle);
+      updateColumn(id, currentTitle);
     }
     if (e.key === "Escape") {
       setCurrentTitle(title);
       setIsEditing(false);
     }
-  };
-
-  const editCardTitle = (cardId: string, title: string) => {
-    updateCard({ id: cardId, title }, id);
   };
 
   const onNewCardDissmiss = () => {
@@ -175,6 +178,9 @@ const Column: React.FC<ColumnProps> = ({
               onChange={({ target }) => setCurrentTitle(target.value)}
               onKeyDown={onKeyDown}
             />
+            <DeleteButton onClick={() => deleteColumn(id)}>
+              <TrashIcon />
+            </DeleteButton>
           </Header>
           <Droppable droppableId={id} type="card">
             {(provided, snapshot) => (
@@ -187,11 +193,11 @@ const Column: React.FC<ColumnProps> = ({
               >
                 {cards.map((card, index) => (
                   <Card
+                    columnId={id}
                     currentIndex={index}
                     key={card.id}
                     id={card.id}
                     title={card.title}
-                    editCard={editCardTitle}
                   />
                 ))}
                 {isAddingCard && (

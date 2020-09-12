@@ -15,6 +15,7 @@ export const Container = styled.div`
 
 export const Title = styled.span`
   font-size: 14px;
+  flex-grow: 1;
   font-weight: 400;
   line-height: 20px;
   text-align: start;
@@ -22,6 +23,7 @@ export const Title = styled.span`
 `;
 
 export const Input = styled.textarea`
+  flex-grow: 1;
   font-family: sans-serif;
   width: 100%;
   background: #fff;
@@ -33,6 +35,7 @@ export const Input = styled.textarea`
   font-weight: 400;
   min-height: 20px;
   display: block;
+  overflow: hidden;
 
   ::placeholder {
     font-weight: 400;
@@ -51,4 +54,22 @@ export const EditTitleButton = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
+`;
+
+export const DeleteButton = styled.button`
+  align-self: flex-start;
+  position: relative;
+  color: #42526e;
+  background-color: transparent;
+  padding: 4px;
+  border-radius: 3px;
+  margin-top: -2px;
+  margin-right: -4px;
+  opacity: 0.8;
+
+  :hover {
+    opacity: 1;
+    color: #172b4d;
+    background-color: rgba(9, 30, 66, 0.08);
+  }
 `;
